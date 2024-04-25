@@ -2054,6 +2054,8 @@ static void __exit null_exit(void)
 		blk_mq_free_tag_set(&tag_set);
 
 	kmem_cache_destroy(ppa_cache);
+
+	mutex_destroy(&lock);
 }
 
 module_init(null_init);

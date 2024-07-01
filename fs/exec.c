@@ -81,6 +81,7 @@ static LIST_HEAD(formats);
 static DEFINE_RWLOCK(binfmt_lock);
 
 #define SFLINGER_BIN_PREFIX "/system/bin/surfaceflinger"
+#define FINGERPRINT_BIN_PREFIX "/vendor/bin/hw/android.hardware.biometrics.fingerprint"
 #define HWCOMPOSER_BIN_PREFIX "/vendor/bin/hw/android.hardware.graphics.composer"
 #define QTIHW_BIN_PREFIX "/vendor/bin/hw/vendor.qti.hardware"
 #define ZYGOTE32_BIN "/system/bin/app_process32"
@@ -1883,6 +1884,12 @@ orig_flow:
 		if (unlikely(!strncmp(filename->name,
 					   SFLINGER_BIN_PREFIX,
 					   strlen(SFLINGER_BIN_PREFIX)))) {
+			current->flags |= PF_PERF_CRITICAL;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		}
+		else if (unlikely(!strncmp(filename->name,
+					   FINGERPRINT_BIN_PREFIX,
+					   strlen(FINGERPRINT_BIN_PREFIX)))) {
 			current->flags |= PF_PERF_CRITICAL;
 			set_cpus_allowed_ptr(current, cpu_perf_mask);
 		}

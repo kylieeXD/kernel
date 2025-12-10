@@ -32,6 +32,8 @@
 *.o.*
 *.order
 *.patch
+*.rej
+*.orig
 *.s
 *.so
 *.so.dbg
@@ -132,3 +134,10 @@ out/
 qcacld
 wg
 regen
+
+# Ignore build
+compile.log
+log.txt
+clang/
+tc/
+out/

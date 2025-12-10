@@ -332,11 +332,17 @@ irqreturn_t npu_intr_hdler(int irq, void *ptr)
 
 	INTERRUPT_ACK(npu_dev, irq);
 
-	/* Check that the event thread currently is running */
-	if (host_ctx->wq)
-		queue_work(host_ctx->wq, &host_ctx->irq_work);
-
 	return IRQ_HANDLED;
+}
+
+irqreturn_t npu_intr_thrd_hdler(int irq, void *ptr)
+{
+        struct npu_device *npu_dev = (struct npu_device *)ptr;
+
+        if (!host_error_hdlr(npu_dev, false)) {
+                host_session_msg_hdlr(npu_dev);
+        }
+        return IRQ_HANDLED;
 }
 
 /* -------------------------------------------------------------------------
@@ -383,7 +389,6 @@ static void host_irq_wq(struct work_struct *work)
 	struct npu_host_ctx *host_ctx;
 	struct npu_device *npu_dev;
 
-	host_ctx = container_of(work, struct npu_host_ctx, irq_work);
 	npu_dev = container_of(host_ctx, struct npu_device, host_ctx);
 
 	if (host_error_hdlr(npu_dev, false))
@@ -421,7 +426,6 @@ static struct workqueue_struct *npu_create_wq(struct npu_host_ctx *host_ctx,
 	struct workqueue_struct *wq =
 		alloc_workqueue(name, WQ_HIGHPRI | WQ_UNBOUND, 0);
 
-	INIT_WORK(&host_ctx->irq_work, host_irq_wq);
 	INIT_DELAYED_WORK(&host_ctx->fw_deinit_work, fw_deinit_wq);
 
 	return wq;

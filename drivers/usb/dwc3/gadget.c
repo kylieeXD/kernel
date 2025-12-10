@@ -3990,6 +3990,7 @@ static irqreturn_t dwc3_check_event_buf(struct dwc3_event_buffer *evt)
 		pm_runtime_get(dwc->dev);
 		disable_irq_nosync(dwc->irq_gadget);
 		return IRQ_HANDLED;
+	}
 
 	/*
 	 * With PCIe legacy interrupt, test shows that top-half irq handler can

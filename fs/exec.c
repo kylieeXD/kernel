@@ -80,6 +80,9 @@ int suid_dumpable = 0;
 static LIST_HEAD(formats);
 static DEFINE_RWLOCK(binfmt_lock);
 
+#define SFLINGER_BIN_PREFIX "/system/bin/surfaceflinger"
+#define HWCOMPOSER_BIN_PREFIX "/vendor/bin/hw/android.hardware.graphics.composer"
+#define QTIHW_BIN_PREFIX "/vendor/bin/hw/vendor.qti.hardware"
 #define ZYGOTE32_BIN "/system/bin/app_process32"
 #define ZYGOTE64_BIN "/system/bin/app_process64"
 static struct signal_struct *zygote32_sig;
@@ -1875,6 +1878,33 @@ orig_flow:
 	retval = exec_binprm(bprm);
 	if (retval < 0)
 		goto out;
+
+	if (is_global_init(current->parent)) {
+		if (unlikely(!strncmp(filename->name,
+					   SFLINGER_BIN_PREFIX,
+					   strlen(SFLINGER_BIN_PREFIX)))) {
+			current->flags |= PF_PERF_CRITICAL;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		}
+		else if (unlikely(!strncmp(filename->name,
+					   HWCOMPOSER_BIN_PREFIX,
+					   strlen(HWCOMPOSER_BIN_PREFIX)))) {
+			current->flags |= PF_PERF_CRITICAL;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		}
+		else if (unlikely(!strncmp(filename->name,
+					   QTIHW_BIN_PREFIX,
+					   strlen(QTIHW_BIN_PREFIX)))) {
+			current->flags |= PF_PERF_CRITICAL;
+			set_cpus_allowed_ptr(current, cpu_perf_mask);
+		}
+		else if (unlikely(!strcmp(filename->name, ZYGOTE32_BIN))) {
+			zygote32_sig = current->signal;
+		}
+		else if (unlikely(!strcmp(filename->name, ZYGOTE64_BIN))) {
+			zygote64_sig = current->signal;
+		}
+	}
 
 	/* execve succeeded */
 	current->fs->in_exec = 0;

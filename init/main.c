@@ -78,6 +78,7 @@
 #include <linux/blkdev.h>
 #include <linux/elevator.h>
 #include <linux/sched_clock.h>
+#include <linux/jump_label.h>
 #include <linux/sched/task.h>
 #include <linux/sched/task_stack.h>
 #include <linux/context_tracking.h>
@@ -146,6 +147,33 @@ static char *initcall_command_line;
 
 static char *execute_command;
 static char *ramdisk_execute_command;
+
+/* Workarounds */
+static bool legacy_timestamp_source = false;
+DEFINE_STATIC_KEY_FALSE(legacy_timestamp_key);
+EXPORT_SYMBOL(legacy_timestamp_key);
+
+static int __init set_timestamp_source(char *val)
+{
+	int tmp = legacy_timestamp_source;
+
+	if (get_option(&val, &tmp)) {
+		legacy_timestamp_source = tmp != 0;
+	}
+
+	if (legacy_timestamp_source)
+		static_branch_enable(&legacy_timestamp_key);
+	else
+		static_branch_disable(&legacy_timestamp_key);
+
+	return 0;
+}
+__setup("legacy_timestamp_source=", set_timestamp_source);
+
+unsigned int is_legacy_timestamp(void)
+{
+	return legacy_timestamp_source;
+}
 
 /*
  * Used to generate warnings if static_key manipulation functions are used

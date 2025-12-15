@@ -12,3 +12,6 @@ LA.UM.9.x is a staging branches, but now i never touch it, and focus on R and T 
 
 ### Lineage branches
 Up to date branches, I always merge their branches, and add something, as i can try.
+
+# See you :(
+I've tired of all this shit, nvm, i still update, but not always 

@@ -132,6 +132,4 @@ out/
 compile.log
 log.txt
 *.zip
-tc/
-clang/
-anykernel/
+AK3
